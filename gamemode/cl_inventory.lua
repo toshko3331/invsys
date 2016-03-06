@@ -1,0 +1,1 @@
+//Client-side file for inventory system.
