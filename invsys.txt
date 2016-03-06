@@ -1,6 +1,0 @@
-"invsys"
-{
-	"base"		"base"
-	"title"		"Inventory System"
-	"menusystem"	"1"
-}
