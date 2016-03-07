@@ -1,4 +1,6 @@
 --Server-side file for the inventory system.
+util.AddNetworkString( "SetClientInventory" )
+
 inventory = { }
 inventory.width = 8
 inventory.height = 8
@@ -37,7 +39,7 @@ function inventory.InitializePlayerInventory( ply )
 	for i=0,inventory.totalSlots - 1,1 do
 		inv[i] = sql.QueryValue( "SELECT '"..i.."' FROM inventory WHERE SteamID = '"..steamID.."'" )
 	end
-	--TODO:Send the data to the client.
+	inventory.SetClientInv( ply,inv )
 end
 hook.Add( "PlayerInitialSpawn", "Send the inventory to the client.", inventory.InitializePlayerInventory )
 
@@ -51,4 +53,10 @@ end
 
 function inventory.SwapItems()
 	--TODO
+end
+
+function inventory.SetClientInv( ply,inventoryTable )
+	net.Start( "SetClientInventory" )
+	net.WriteTable( inventoryTable )
+	net.Send( ply )	
 end
