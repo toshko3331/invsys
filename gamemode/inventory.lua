@@ -9,6 +9,7 @@ inventory.width = 8
 inventory.height = 8
 inventory.totalSlots = inventory.width * inventory.height
 inventory.noItemLiteral = ""
+inventory.fullInventory = -1 -- -1 because it expects a number and so -1 is the natural error value.
 
 local function CreateInvTable()
 	sql.Query( "CREATE TABLE inventory( SteamID TEXT UNIQUE)" )
@@ -47,18 +48,15 @@ end
 hook.Add( "PlayerInitialSpawn", "PlayerInvInit", inventory.InitializePlayerInventory )
 
 function inventory.AddItem( ply,item,slot )
-
+	-- Checking if the slot is occupied is left to the caller.
+	
 	local steamID = ply:SteamID()
 	-- Does the player have an inventory?
 	if sql.QueryValue( "SELECT * FROM inventory WHERE SteamID = '"..steamID.."'" ) == nil then
 		print( "Player inventory doesn't exist." )
 		return
 	end
-	if sql.QueryValue( "SELECT \""..slot.."\" FROM inventory WHERE SteamID = '"..steamID.."'" ) ~= inventory.noItemLiteral then
-		-- Is item slot occupied?
-		print( "Item slot is full." )
-		return
-	end	
+	
 	-- Update the database and send update to client.
 	sql.Query("UPDATE inventory SET '"..slot.."' = '"..item.."' WHERE SteamID = '"..steamID.."'")
 	hook.Run( "ItemAdd",ply,item,slot )
@@ -70,6 +68,19 @@ end
 
 function inventory.SwapItems()
 	--TODO
+end
+
+function inventory.GetNextAvailableSlot( ply )
+
+	local steamID = ply:SteamID()
+	local slot = inventory.fullInventory;
+	for i=0,inventory.totalSlots - 1,1 do
+		if sql.QueryValue( "SELECT \""..i.."\" FROM inventory WHERE SteamID = '"..steamID.."'" ) == inventory.noItemLiteral then
+			slot = i
+			break
+		end
+	end
+	return slot
 end
 
 hook.Add( "FullInvUpdate", "PlyFullInvUpdate", function ( ply,inventoryTable )

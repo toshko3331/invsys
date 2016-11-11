@@ -1,1 +1,2 @@
 //Shared.lua
+DeriveGamemode( "sandbox" )
