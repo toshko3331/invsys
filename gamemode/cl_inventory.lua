@@ -1,8 +1,21 @@
 //Client-side file for inventory system.
+inventory = {}
 inventory.invTable = {}
 
-function inventory.ServerInventoryUpdate( len )
-	inventory.invTable = net.ReadTable()-- We may need to reverse the order of all the entries depending
-	-- if the order is swaped around.
+function inventory.HandleFullInvUpdate()
+	inventory.invTable = net.ReadTable()
 end
-net.Receive( "SetClientInventory", inventory.ServerInventoryUpdate )
+net.Receive( "FullInvUpdate",inventory.HandleFullInvUpdate )
+
+function inventory.HandleAddItem()
+	local item = net.ReadString()
+	local slot = net.ReadInt( 32 )
+	inventory.invTable[slot] = item
+end
+net.Receive( "ItemAdd", inventory.HandleAddItem )
+
+function inventory.PrintInvTable()
+	PrintTable(inventory.invTable)
+end
+concommand.Add( "print_invTable",inventory.PrintInvTable ) 
+
